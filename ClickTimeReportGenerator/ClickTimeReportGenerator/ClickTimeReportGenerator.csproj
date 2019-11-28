@@ -54,8 +54,12 @@
     <Compile Include="Contracts\ErrorResponse.cs" />
     <Compile Include="Contracts\GetManagedUsersResponse.cs" />
     <Compile Include="Contracts\GetMeResponse.cs" />
+    <Compile Include="Contracts\GetTimeOffResponse.cs" />
+    <Compile Include="Contracts\GetTimesheetHoursResponse.cs" />
     <Compile Include="Contracts\GetTimesheetResponse.cs" />
+    <Compile Include="Contracts\TimeOffData.cs" />
     <Compile Include="Contracts\TimesheetData.cs" />
+    <Compile Include="Contracts\TimesheetHourData.cs" />
     <Compile Include="CTReportGenerator.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

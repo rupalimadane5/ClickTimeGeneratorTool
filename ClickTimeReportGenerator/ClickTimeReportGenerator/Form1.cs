@@ -3,7 +3,10 @@ using System.Data;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
-using System.Net.Mail;  
+using System.Net.Mail;
+using System.IO;
+using System.Drawing;
+using System.Reflection;
 
 namespace ClickTimeReportGenerator
 {
@@ -18,13 +21,13 @@ namespace ClickTimeReportGenerator
         {
             try
             {
-                var timesheetDate = new DateTime(2019, 05, 30);
+                var timesheetDate = new DateTime(2019, 10, 02);
 
                 CTReportGenerator generator = new CTReportGenerator(timesheetDate);
 
                 Task<DataTable> tasks = Task.Run(() => generator.GetReport());
                 tasks.Wait();
-                
+
                 ExportToExcel(tasks.Result);
 
                 Application.Exit();
@@ -45,18 +48,47 @@ namespace ClickTimeReportGenerator
             worksheet = workbook.Sheets["Sheet1"];
             worksheet = workbook.ActiveSheet;
             worksheet.Name = "ClickTime data";
+
+
             for (int i = 1; i < dt.Columns.Count + 1; i++)
             {
                 worksheet.Cells[1, i] = dt.Columns[i - 1].Caption;
             }
 
-            for (int i = 0; i < dt.Rows.Count ; i++)
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
                 for (int j = 0; j < dt.Columns.Count; j++)
                 {
                     worksheet.Cells[i + 2, j + 1] = dt.Rows[i][j].ToString();
+
+                    if (dt.Columns[j].ColumnName.Equals("Status"))
+                    {
+                        Microsoft.Office.Interop.Excel.Range range = worksheet.get_Range($"G{i + 2}");
+                        if (Convert.ToString(range.Value) == "Open")
+                        {
+                            range.Interior.Color = Color.Red;
+                        }
+                    }
+
+                    //if (dt.Columns[j].ColumnName.Equals("TotalHours"))
+                    //{
+                    //    Microsoft.Office.Interop.Excel.Range range = worksheet.get_Range($"J{i + 2}");
+                    //    if (Convert.ToDouble(range.Value) < Constants.MinTimesheetHours)
+                    //    {
+                    //        range.Interior.Color = Color.Red;
+                    //    }
+                    //}
                 }
             }
+
+            Microsoft.Office.Interop.Excel.Range rowRange = worksheet.get_Range("A1:J1", Missing.Value);
+            rowRange.Interior.Color = Color.Yellow;
+
+            if (File.Exists("D:\\ClickTimeReport.xls"))
+            {
+                File.Delete("D:\\ClickTimeReport.xls");
+            }
+
             workbook.SaveAs("D:\\ClickTimeReport.xls", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Microsoft.Office.Interop.Excel.XlSaveAsAccessMode.xlExclusive, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
         }
     }

@@ -83,6 +83,7 @@ namespace ClickTimeReportGenerator
         private async Task<DataTable> GenerateDataTable(List<DataResponse> users)
         {
             DataTable dt = new DataTable();
+
             dt.Columns.Add("Sr No");
             dt.Columns.Add("Name");
             dt.Columns.Add("Id");
@@ -90,11 +91,17 @@ namespace ClickTimeReportGenerator
             dt.Columns.Add("Start Date");
             dt.Columns.Add("End Date");
             dt.Columns.Add("Status");
-            
+
+            //dt.Columns.Add("WorkingHours");
+            //dt.Columns.Add("LeaveHours");
+            //dt.Columns.Add("TotalHours");
+
+            //dt.Columns.Add("UserId");
+            //dt.Columns.Add("TimesheetId");
+
 
             for (int i = 0; i < users.Count; i++)
             {
-
                 var timesheetDetails = await HttpServices.GetTimesheetByUserAndDate(Constants.Token, users[i].ClickTimeId, _timesheetDate)
                     .ConfigureAwait(false);
 
@@ -109,10 +116,55 @@ namespace ClickTimeReportGenerator
                 row["End Date"] = timesheetDetails?.Data?.EndDate;
                 row["Status"] = timesheetDetails?.Data?.Status;
 
+                //var timesheetHours = await GetTimesheetHoursByTimesheetId(timesheetDetails?.Data?.TimesheetID, timesheetDetails?.Data?.UserID);
+                //var timeOffHours = await GetTimeOffHoursByTimesheetId(timesheetDetails?.Data?.TimesheetID, timesheetDetails?.Data?.UserID);
+
+                //row["WorkingHours"] = timesheetHours;
+
+                //row["LeaveHours"] = timeOffHours;
+
+                //row["TotalHours"] = timesheetHours + timeOffHours;
+
+
+
                 dt.Rows.Add(row);
             }
 
             return dt;
+        }
+
+        private async Task<decimal> GetTimesheetHoursByTimesheetId(string timsheetId, string userId)
+        {
+            var response = await HttpServices.GetTimesheetHoursByTimesheetId(Constants.Token, timsheetId);
+
+            if (response?.Error?.Any() ?? false)
+            {
+                throw new Exception(response.Error[0].Message);
+            }
+
+            if (response?.Data.All(x => x.UserID.Equals(userId)) ?? false)
+            {
+                return response?.Data.Sum(y => y.Hours) ?? 0;
+            }
+
+            return 0;
+        }
+
+        private async Task<decimal> GetTimeOffHoursByTimesheetId(string timsheetId, string userId)
+        {
+            var response = await HttpServices.GetTimeOffByTimesheetId(Constants.Token, timsheetId);
+
+            if (response?.Error?.Any() ?? false)
+            {
+                throw new Exception(response.Error[0].Message);
+            }
+
+            if (response?.Data.All(x => x.UserID.Equals(userId)) ?? false)
+            {
+                return response?.Data.Sum(y => y.Hours) ?? 0;
+            }
+
+            return 0;
         }
     }
 }

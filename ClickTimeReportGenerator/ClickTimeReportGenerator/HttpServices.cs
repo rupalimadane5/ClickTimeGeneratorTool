@@ -56,6 +56,40 @@ namespace ClickTimeReportGenerator
             return null;
         }
 
+        public static async Task<GetTimesheetHoursResponse> GetTimesheetHoursByTimesheetId(string token, string timesheetId)
+        {
+            InitializeClient();
+
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Add("Authorization", $"Token {token}");
+
+            string url = string.Format(Constants.GetTimesheetHours, timesheetId);
+
+            var response = await Client.GetAsync(new Uri(url)).ConfigureAwait(false);
+            if (response != null)
+            {
+                return JsonConvert.DeserializeObject<GetTimesheetHoursResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            }
+            return null;
+        }
+
+        public static async Task<GetTimeOffResponse> GetTimeOffByTimesheetId(string token, string timesheetId)
+        {
+            InitializeClient();
+
+            Client.DefaultRequestHeaders.Clear();
+            Client.DefaultRequestHeaders.Add("Authorization", $"Token {token}");
+
+            string url = string.Format(Constants.GetTimeOffByTimesheetId, timesheetId);
+
+            var response = await Client.GetAsync(new Uri(url)).ConfigureAwait(false);
+            if (response != null)
+            {
+                return JsonConvert.DeserializeObject<GetTimeOffResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            }
+            return null;
+        }
+
         private static HttpClient InitializeClient()
         {
             if (Client == null)
