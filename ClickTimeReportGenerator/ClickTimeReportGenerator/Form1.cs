@@ -21,7 +21,7 @@ namespace ClickTimeReportGenerator
         {
             try
             {
-                var timesheetDate = new DateTime(2019, 10, 02);
+                var timesheetDate = new DateTime(2020, 04, 01);
 
                 CTReportGenerator generator = new CTReportGenerator(timesheetDate);
 

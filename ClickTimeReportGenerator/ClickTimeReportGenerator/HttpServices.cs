@@ -39,7 +39,7 @@ namespace ClickTimeReportGenerator
             return null;
         }
 
-        public static async Task<GetTimesheetResponse> GetTimesheetByUserAndDate(string token, string userId, string date)
+        public static async Task<GetTimesheetResponse> GetTimesheetByUserAndDate(string token, string userId, string date,string token_abhijit)
         {
             InitializeClient();
 
@@ -49,8 +49,15 @@ namespace ClickTimeReportGenerator
             string url = string.Format(Constants.GetTimesheet, date, userId);
 
             var response = await Client.GetAsync(new Uri(url)).ConfigureAwait(false);
-            if (response != null)
+            if (response != null && response.StatusCode != System.Net.HttpStatusCode.NotFound)
             {
+                return JsonConvert.DeserializeObject<GetTimesheetResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
+            }
+            else if(response != null && response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                Client.DefaultRequestHeaders.Clear();
+                Client.DefaultRequestHeaders.Add("Authorization", $"Token {token_abhijit}");
+                response = await Client.GetAsync(new Uri(url)).ConfigureAwait(false);
                 return JsonConvert.DeserializeObject<GetTimesheetResponse>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
             }
             return null;

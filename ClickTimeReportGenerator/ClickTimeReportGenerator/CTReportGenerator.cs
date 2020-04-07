@@ -46,10 +46,11 @@ namespace ClickTimeReportGenerator
                 throw new Exception($"You are not authorized to get the ClickTime report");
             }
 
-            if (!response.Data.DivisionID.Equals(Constants.LZDivisionId))
-            {
-                throw new Exception($"You are not authorized to get the LZ ClickTime report as you are not from LegalZoom team");
-            }
+            //TODO : Currently commenting this condition as Milind and Abhijit both are not assigned to LZ Division.
+            //if (!response.Data.DivisionID.Equals(Constants.LZDivisionId))
+            //{
+            //    throw new Exception($"You are not authorized to get the LZ ClickTime report as you are not from LegalZoom team");
+            //}
         }
 
         private async Task<List<DataResponse>> GetManagedUsersDetails()
@@ -67,7 +68,7 @@ namespace ClickTimeReportGenerator
             }
 
             var managedUsers = response.Data
-                .Where(x => x.TimesheetApproverID == Constants.TimesheetApproverID
+                .Where(x => (x.TimesheetApproverID == Constants.TimesheetApproverID_Milind || x.TimesheetApproverID == Constants.TimesheetApproverID_Abhijit)
                         && x.DivisionID == Constants.LZDivisionId
                         && x.IsActive)
                 .ToList();
@@ -102,7 +103,7 @@ namespace ClickTimeReportGenerator
 
             for (int i = 0; i < users.Count; i++)
             {
-                var timesheetDetails = await HttpServices.GetTimesheetByUserAndDate(Constants.Token, users[i].ClickTimeId, _timesheetDate)
+                var timesheetDetails = await HttpServices.GetTimesheetByUserAndDate(Constants.Token, users[i].ClickTimeId, _timesheetDate, Constants.Token_Abhijit)
                     .ConfigureAwait(false);
 
                 var srNo = i + 1;
