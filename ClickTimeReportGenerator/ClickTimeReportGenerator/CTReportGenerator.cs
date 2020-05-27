@@ -70,8 +70,12 @@ namespace ClickTimeReportGenerator
             var managedUsers = response.Data
                 .Where(x => (x.TimesheetApproverID == Constants.TimesheetApproverID_Milind || x.TimesheetApproverID == Constants.TimesheetApproverID_Abhijit)
                         && x.DivisionID == Constants.LZDivisionId
-                        && x.IsActive)
-                .ToList();
+                        && x.IsActive
+                        && (x.Name.Contains("Rupali") || x.Name.Contains("Vaishnavi") || x.Name.Contains("Yogesh")
+                        || x.Name.Contains("Dhanashree") || x.Name.Contains("Girish")))
+            .ToList();
+
+
 
             if (!managedUsers.Any())
             {
@@ -87,54 +91,87 @@ namespace ClickTimeReportGenerator
 
             dt.Columns.Add("Sr No");
             dt.Columns.Add("Name");
-            dt.Columns.Add("Id");
-            dt.Columns.Add("Email");
-            dt.Columns.Add("Start Date");
-            dt.Columns.Add("End Date");
-            dt.Columns.Add("Status");
+            //dt.Columns.Add("Id");
+            //dt.Columns.Add("Email");
+            //dt.Columns.Add("Start Date");
+            //dt.Columns.Add("End Date");
+            //dt.Columns.Add("Status");
 
-            //dt.Columns.Add("WorkingHours");
-            //dt.Columns.Add("LeaveHours");
-            //dt.Columns.Add("TotalHours");
-
-            //dt.Columns.Add("UserId");
-            //dt.Columns.Add("TimesheetId");
-
+            dt.Columns.Add("TimesheetDate");
+            dt.Columns.Add("StatusReporting");
+            dt.Columns.Add("Development");
+            dt.Columns.Add("UnitTesting");
+            dt.Columns.Add("CodeReview");
+            dt.Columns.Add("DefectFixing");
+            dt.Columns.Add("DevelopmentUnbillable");
+            dt.Columns.Add("Onboarding-KT");
+            dt.Columns.Add("TotalTimesheetHours");
 
             for (int i = 0; i < users.Count; i++)
             {
                 var timesheetDetails = await HttpServices.GetTimesheetByUserAndDate(Constants.Token, users[i].ClickTimeId, _timesheetDate, Constants.Token_Abhijit)
                     .ConfigureAwait(false);
 
-                var srNo = i + 1;
-                var row = dt.NewRow();
+                var timesheetHours = await GetTimesheetHoursByTimesheetId(timesheetDetails?.Data?.TimesheetID, timesheetDetails?.Data?.UserID);
 
-                row["Sr No"] = srNo;
-                row["Name"] = users[i].Name;
-                row["Id"] = users[i].EmployeeId;
-                row["Email"] = users[i].Email;
-                row["Start Date"] = timesheetDetails?.Data?.StartDate;
-                row["End Date"] = timesheetDetails?.Data?.EndDate;
-                row["Status"] = timesheetDetails?.Data?.Status;
+                var timesheetDate = Convert.ToDateTime(timesheetDetails?.Data?.StartDate).AddDays(2);
 
-                //var timesheetHours = await GetTimesheetHoursByTimesheetId(timesheetDetails?.Data?.TimesheetID, timesheetDetails?.Data?.UserID);
-                //var timeOffHours = await GetTimeOffHoursByTimesheetId(timesheetDetails?.Data?.TimesheetID, timesheetDetails?.Data?.UserID);
+                for (int j = 0; j < 5; j++)
+                {
+                    var statusReportingHours = timesheetHours.Where(x => x.TimesheetDate == timesheetDate.ToString("yyyy-MM-dd")
+                    && (x.TaskId == "4LAIuDKFMsTqVfv6eUiETeQ2" || x.TaskId == "4O3GMEq-raPBXTwy1SbMfCw2"))?.FirstOrDefault()?.Hours ?? 0;
 
-                //row["WorkingHours"] = timesheetHours;
+                    var devHours = timesheetHours.Where(x => x.TimesheetDate == timesheetDate.ToString("yyyy-MM-dd")
+                    && (x.TaskId == "4Yq1dSSGY9dUIG9B6uJYwAQ2" || x.TaskId == "4GgxFznnRGZfj1HljViuZxQ2"))?.FirstOrDefault()?.Hours ?? 0;
 
-                //row["LeaveHours"] = timeOffHours;
+                    var unitTestsHours = timesheetHours.Where(x => x.TimesheetDate == timesheetDate.ToString("yyyy-MM-dd")
+                    && x.TaskId == "4_Hhldajki0u8yQakLH_X2g2")?.FirstOrDefault()?.Hours ?? 0;
 
-                //row["TotalHours"] = timesheetHours + timeOffHours;
+                    var codeReviewsHours = timesheetHours.Where(x => x.TimesheetDate == timesheetDate.ToString("yyyy-MM-dd")
+                    && (x.TaskId == "4uqvfyYwHEai-_BsUD5unMg2" || x.TaskId == "4fhj7wvpJNfsH1P4REvfu0Q2"))?.FirstOrDefault()?.Hours ?? 0;
 
+                    var defectFixingHours = timesheetHours.Where(x => x.TimesheetDate == timesheetDate.ToString("yyyy-MM-dd")
+                     && x.TaskId == "4RrmchWnZgxp7ZvUwyKu1oA2")?.FirstOrDefault()?.Hours ?? 0;
 
+                    var devUnbillableHours = timesheetHours.Where(x => x.TimesheetDate == timesheetDate.ToString("yyyy-MM-dd")
+                    && (x.TaskId == "4KX_Pe17ImqRZIlZi5T16dw2"))?.FirstOrDefault()?.Hours ?? 0;
 
-                dt.Rows.Add(row);
+                    var onboardingKTHours = timesheetHours.Where(x => x.TimesheetDate == timesheetDate.ToString("yyyy-MM-dd")
+                    && (x.TaskId == "41CpoNMprvKtl0qDyHHX8Bw2"))?.FirstOrDefault()?.Hours ?? 0;
+
+                    var srNo = j + 1;
+                    var row = dt.NewRow();
+
+                    row["Sr No"] = srNo;
+                    row["Name"] = users[i].Name;
+                    //row["Id"] = users[i].EmployeeId;
+                    //row["Email"] = users[i].Email;
+                    //row["Start Date"] = timesheetDetails?.Data?.StartDate;
+                    //row["End Date"] = timesheetDetails?.Data?.EndDate;
+                    //row["Status"] = timesheetDetails?.Data?.Status;
+
+                    row["TimesheetDate"] = timesheetDate.ToString("dd-MM-yyyy");
+                    row["StatusReporting"] = statusReportingHours;
+                    row["Development"] = devHours;
+                    row["UnitTesting"] = unitTestsHours;
+                    row["CodeReview"] = codeReviewsHours;
+                    row["DefectFixing"] = defectFixingHours;
+                    row["DevelopmentUnbillable"] = devUnbillableHours;
+                    row["Onboarding-KT"] = onboardingKTHours;
+                    row["TotalTimesheetHours"] = statusReportingHours + devHours + unitTestsHours + codeReviewsHours
+                        + defectFixingHours + devUnbillableHours + onboardingKTHours;
+
+                    dt.Rows.Add(row);
+                    timesheetDate = timesheetDate.AddDays(1);
+                }
+                dt.Rows.Add(dt.NewRow());
+
             }
 
             return dt;
         }
 
-        private async Task<decimal> GetTimesheetHoursByTimesheetId(string timsheetId, string userId)
+        private async Task<List<TimesheetHourData>> GetTimesheetHoursByTimesheetId(string timsheetId, string userId)
         {
             var response = await HttpServices.GetTimesheetHoursByTimesheetId(Constants.Token, timsheetId);
 
@@ -143,12 +180,13 @@ namespace ClickTimeReportGenerator
                 throw new Exception(response.Error[0].Message);
             }
 
-            if (response?.Data.All(x => x.UserID.Equals(userId)) ?? false)
-            {
-                return response?.Data.Sum(y => y.Hours) ?? 0;
-            }
+            //if (response?.Data.All(x => x.UserID.Equals(userId)) ?? false)
+            //{
+            //    return response?.Data.Sum(y => y.Hours) ?? 0;
+            //}
 
-            return 0;
+
+            return response?.Data;
         }
 
         private async Task<decimal> GetTimeOffHoursByTimesheetId(string timsheetId, string userId)

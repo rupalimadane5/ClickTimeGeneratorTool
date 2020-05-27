@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Net;
-using System.Net.Mail;
-using System.IO;
-using System.Drawing;
-using System.Reflection;
 
 namespace ClickTimeReportGenerator
 {
@@ -21,7 +19,7 @@ namespace ClickTimeReportGenerator
         {
             try
             {
-                var timesheetDate = new DateTime(2020, 04, 01);
+                var timesheetDate = new DateTime(2020, 04, 29);
 
                 CTReportGenerator generator = new CTReportGenerator(timesheetDate);
 
@@ -70,10 +68,10 @@ namespace ClickTimeReportGenerator
                         }
                     }
 
-                    //if (dt.Columns[j].ColumnName.Equals("TotalHours"))
+                    //if (dt.Columns[j].ColumnName.Equals("TotalTimesheetHours"))
                     //{
                     //    Microsoft.Office.Interop.Excel.Range range = worksheet.get_Range($"J{i + 2}");
-                    //    if (Convert.ToDouble(range.Value) < Constants.MinTimesheetHours)
+                    //    if (Convert.ToDouble(range.Value) < 8.5)
                     //    {
                     //        range.Interior.Color = Color.Red;
                     //    }
@@ -81,7 +79,7 @@ namespace ClickTimeReportGenerator
                 }
             }
 
-            Microsoft.Office.Interop.Excel.Range rowRange = worksheet.get_Range("A1:J1", Missing.Value);
+            Microsoft.Office.Interop.Excel.Range rowRange = worksheet.get_Range("A1:K1", Missing.Value);
             rowRange.Interior.Color = Color.Yellow;
 
             if (File.Exists("D:\\ClickTimeReport.xls"))
